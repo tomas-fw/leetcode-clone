@@ -1,15 +1,53 @@
 'use client';
 
 import { useAuthModalRecoilUpdate } from '@/atoms/auth-modal-atom';
+import { auth } from '@/firebase/firebase';
+import { useRouter } from 'next/navigation';
+import { ChangeEvent, useEffect, useState } from 'react';
+import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
+import { allFieldsFilled } from '../../../../utils/form-validation';
 
 const Login = () => {
     const setAuthModalState = useAuthModalRecoilUpdate();
+    const router = useRouter();
+    const [signInWithEmailAndPassword, loading, , error] = useSignInWithEmailAndPassword(auth);
+    const [inputs, setInputs] = useState({
+        email: '',
+        password: '',
+    });
+
+    useEffect(() => {
+        if (error) {
+            alert(error.message);
+        }
+    }, [error]);
 
     const handleClick = (type: 'forgotPassword' | 'register') => {
         setAuthModalState((prev) => ({ ...prev, type }));
     };
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setInputs((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e: ChangeEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            if (!allFieldsFilled(inputs)) {
+                alert('Please fill all the fields');
+                return;
+            }
+            const user = await signInWithEmailAndPassword(inputs.email, inputs.password);
+            if (!user) return;
+            console.log('🚀 ~ file: index.tsx:39 ~ handleSubmit ~ user:', user);
+            router.push('/');
+        } catch (error) {
+            console.log('error :>> ', error);
+        }
+    };
     return (
-        <form className='space-y-6 px-6 pb-4'>
+        <form className='space-y-6 px-6 pb-4' onSubmit={handleSubmit} noValidate>
             <h3 className='text-xl font-medium text-white'>Sign in to LeetClone</h3>
             <div>
                 <label htmlFor='email' className='text-sm font-medium block mb-2 text-gray-300'>
@@ -20,6 +58,8 @@ const Login = () => {
                     name='email'
                     id='email'
                     placeholder='name@company.com'
+                    onChange={handleChange}
+                    value={inputs.email}
                     className='border-2 outline-none sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full 
                     p-2.5 bg-gray-600 border-gray-500 placeholder-gray-400 text-white'
                 />
@@ -33,6 +73,8 @@ const Login = () => {
                     name='password'
                     id='password'
                     placeholder='******'
+                    onChange={handleChange}
+                    value={inputs.password}
                     className='border-2 outline-none sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full 
                     p-2.5 bg-gray-600 border-gray-500 placeholder-gray-400 text-white'
                 />
@@ -43,7 +85,7 @@ const Login = () => {
                             text-sm px-5 py-2.5 text-center bg-brand-orange hover:bg-brand-orange-s
             '
             >
-                Login
+                {loading ? 'Loading...' : 'Sign In'}
             </button>
             <button className='flex w-full justify-end' onClick={() => handleClick('forgotPassword')}>
                 <a href='#' className='text-sm block text-brand-orange hover:underline w-full text-right'>
