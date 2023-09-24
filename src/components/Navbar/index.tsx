@@ -3,7 +3,7 @@
 import { useAuthModalRecoilUpdate } from '@/atoms/auth-modal-atom';
 import Image from 'next/image';
 import Link from 'next/link';
-import logo from '/public/images/logo.png';
+
 const Navbar = () => {
     const setAuthModalState = useAuthModalRecoilUpdate();
 
@@ -13,7 +13,7 @@ const Navbar = () => {
     return (
         <div className='flex item-center justify-between sm:px-12 px-2 md:px-24'>
             <Link href='/' className='flex items-center justify-center h-20'>
-                <Image src={logo} alt='logo' width={200} height={200} draggable={false} />
+                <Image src='/images/logo.png' alt='logo' width={200} height={200} draggable={false} />
             </Link>
             <div className='flex items-center'>
                 <button

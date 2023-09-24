@@ -4,14 +4,19 @@ import { useAuthModalRecoilUpdate } from '@/atoms/auth-modal-atom';
 import { auth } from '@/firebase/firebase';
 import Image from 'next/image';
 import Link from 'next/link';
+import { FC } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { BsList } from 'react-icons/bs';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import Logout from '../butons/Logout';
-import { Choose, Otherwise, When } from '../flow-control';
+import { Choose, If, Otherwise, When } from '../flow-control';
 import avatar from '/public/images/avatar.png';
-import logo from '/public/images/logo.png';
-type Props = {};
 
-const Topbar = (props: Props) => {
+type Props = {
+    problemPage?: boolean;
+};
+
+const Topbar: FC<Props> = ({ problemPage }) => {
     const [user] = useAuthState(auth);
     const setAuthModalState = useAuthModalRecoilUpdate();
 
@@ -21,10 +26,37 @@ const Topbar = (props: Props) => {
 
     return (
         <nav className='relative flex h-[50px] w-full shrink-0 items-center px-5 bg-dark-layer-1 text-dark-gray-7'>
-            <div className={`flex w-full items-center justify-between max-w-[1200px] mx-auto`}>
+            <div className={`flex w-full items-center justify-between ${!problemPage ? 'max-w-[1200px] mx-auto' : ''}`}>
                 <Link href='/' className='h-[22px] flex-1'>
-                    <Image src={logo} alt='Logo' className='h-full' />
+                    <Image src='/images/logo-full.png' width={100} height={100} alt='Logo' />
                 </Link>
+                <If condition={!!problemPage}>
+                    <div className='flex items-center gap-4 flex-1 justify-center'>
+                        <div
+                            className='flex items-center justify-center rounded bg-dark-fill-3 hover:bg-dark-fill-2
+                        h-8 w-8 cursor-pointer'
+                        >
+                            <FaChevronLeft />
+                        </div>
+                        <Link
+                            href='/'
+                            className='flex items-center gap-2 font-medium max-w-[170px] text-dark-gray-8
+                        cursor-pointer
+                        '
+                        >
+                            <div>
+                                <BsList />
+                            </div>
+                            <p>Problem List</p>
+                        </Link>
+                        <div
+                            className='flex items-center justify-center rounded bg-dark-fill-3 hover:bg-dark-fill-2
+                        h-8 w-8 cursor-pointer'
+                        >
+                            <FaChevronRight />
+                        </div>
+                    </div>
+                </If>
 
                 <div className='flex items-center space-x-4 flex-1 justify-end'>
                     <div>
