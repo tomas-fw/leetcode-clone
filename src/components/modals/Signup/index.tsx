@@ -5,7 +5,8 @@ import { auth } from '@/firebase/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ChangeEvent } from 'react';
 import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
-import { allFieldsFilled } from '../../../../utils/form-validation';
+import { toast } from 'react-toastify';
+import { allFieldsFilled } from '../../../utils/form-validation';
 
 const Signup = () => {
     const setAuthModalState = useAuthModalRecoilUpdate();
@@ -19,7 +20,7 @@ const Signup = () => {
 
     useEffect(() => {
         if (error) {
-            alert(error.message);
+            toast.error(error.message, { position: 'top-center', autoClose: 3000 });
         }
     }, [error]);
 
@@ -35,7 +36,7 @@ const Signup = () => {
     const handleSubmit = async (e: ChangeEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!allFieldsFilled(inputs)) {
-            alert('Please fill all the fields');
+            toast.error('Please fill all fields', { position: 'top-center', autoClose: 3000 });
             return;
         }
 

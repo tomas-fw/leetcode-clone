@@ -5,20 +5,21 @@ import { auth } from '@/firebase/firebase';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useEffect, useState } from 'react';
 import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
-import { allFieldsFilled } from '../../../../utils/form-validation';
+import { toast } from 'react-toastify';
+import { allFieldsFilled } from '../../../utils/form-validation';
 
 const Login = () => {
     const setAuthModalState = useAuthModalRecoilUpdate();
     const router = useRouter();
     const [signInWithEmailAndPassword, loading, , error] = useSignInWithEmailAndPassword(auth);
     const [inputs, setInputs] = useState({
-        email: '',
-        password: '',
+        email: 'hicar50336@ipniel.com',
+        password: 'test123',
     });
 
     useEffect(() => {
         if (error) {
-            alert(error.message);
+            toast.error(error.message, { position: 'top-center', autoClose: 3000 });
         }
     }, [error]);
 
@@ -35,7 +36,7 @@ const Login = () => {
         e.preventDefault();
         try {
             if (!allFieldsFilled(inputs)) {
-                alert('Please fill all the fields');
+                toast.error('Please fill all fields', { position: 'top-center', autoClose: 3000 });
                 return;
             }
             const user = await signInWithEmailAndPassword(inputs.email, inputs.password);

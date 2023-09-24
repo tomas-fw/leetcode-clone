@@ -1,4 +1,4 @@
-import RecoilContextProvider from '@/context/recoilContextProvider';
+import RootContext from '@/context';
 import type { Metadata } from 'next';
 import './globals.css';
 
@@ -12,7 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return (
         <html lang='en'>
             <body>
-                <RecoilContextProvider>{children}</RecoilContextProvider>
+                <RootContext>{children}</RootContext>
             </body>
         </html>
     );
