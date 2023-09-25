@@ -10,6 +10,7 @@ import { BsList } from 'react-icons/bs';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import Logout from '../butons/Logout';
 import { Choose, If, Otherwise, When } from '../flow-control';
+import Timer from '../timer';
 import avatar from '/public/images/avatar.png';
 
 type Props = {
@@ -76,6 +77,9 @@ const Topbar: FC<Props> = ({ problemPage }) => {
                             </Link>
                         </When>
                         <Otherwise>
+                            <If condition={!!problemPage}>
+                                <Timer />
+                            </If>
                             <div className='cursor-pointer group relative'>
                                 <Image src={avatar} alt='avatar image' className='h-8 w-8 rounded-full' />
                                 <div
