@@ -6,7 +6,6 @@ const Problem: NextPage = () => {
     return (
         <div>
             <Topbar problemPage />
-            <h1>Problem</h1>
             <Workspace />
         </div>
     );
