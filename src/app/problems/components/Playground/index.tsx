@@ -1,12 +1,17 @@
+import { For } from '@/components/flow-control';
+import { Problem } from '@/types/problem';
 import { javascript } from '@codemirror/lang-javascript';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import CodeMirror from '@uiw/react-codemirror';
 import Split from 'react-split';
 import EditorFooter from '../EditorFooter';
 import PreferencesNav from '../PreferenceNav';
-type Props = {};
 
-const Playground = (props: Props) => {
+type Props = {
+    problem: Problem;
+};
+
+const Playground = ({ problem }: Props) => {
     const boilerplate = `
     function twoSum(nums, target) {
         // Your code here
@@ -17,7 +22,7 @@ const Playground = (props: Props) => {
             <Split className='h-[calc(100vh-94px)]' direction='vertical' sizes={[61, 40]} minSize={60}>
                 <div className='w-full overflow-auto'>
                     <CodeMirror
-                        value={boilerplate}
+                        value={problem.starterCode}
                         theme={vscodeDark}
                         extensions={[javascript()]}
                         style={{ fontSize: 16 }}
@@ -33,36 +38,20 @@ const Playground = (props: Props) => {
                     </div>
                     {/* Test Case heading */}
                     <div className='flex'>
-                        <div className='mr-2 items-start mt-2 text-white'>
-                            <div className='flex items-center flex-wrap gap-y-4'>
-                                <div
-                                    className='font-medium items-center transition-all focus:outline-none inline-flex bg-dark-fill-3
-                                                hover:bg-dark-fill-2 relative rounded-lg px-4 py-1 cursor-pointer whitespace-nowrap'
-                                >
-                                    Case 1
+                        <For of={problem.examples}>
+                            {(example, index) => (
+                                <div className='mr-2 items-start mt-2 text-white' key={example.id}>
+                                    <div className='flex items-center flex-wrap gap-y-4'>
+                                        <div
+                                            className='font-medium items-center transition-all focus:outline-none inline-flex bg-dark-fill-3
+                        hover:bg-dark-fill-2 relative rounded-lg px-4 py-1 cursor-pointer whitespace-nowrap'
+                                        >
+                                            Case {index + 1}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div className='mr-2 items-start mt-2 text-white'>
-                            <div className='flex items-center flex-wrap gap-y-4'>
-                                <div
-                                    className='font-medium items-center transition-all focus:outline-none inline-flex bg-dark-fill-3
-                                                hover:bg-dark-fill-2 relative rounded-lg px-4 py-1 cursor-pointer whitespace-nowrap'
-                                >
-                                    Case 2
-                                </div>
-                            </div>
-                        </div>
-                        <div className='mr-2 items-start mt-2 text-white'>
-                            <div className='flex items-center flex-wrap gap-y-4'>
-                                <div
-                                    className='font-medium items-center transition-all focus:outline-none inline-flex bg-dark-fill-3
-                                                hover:bg-dark-fill-2 relative rounded-lg px-4 py-1 cursor-pointer whitespace-nowrap'
-                                >
-                                    Case 3
-                                </div>
-                            </div>
-                        </div>
+                            )}
+                        </For>
                     </div>
                     <div className='font-semibold my-4'>
                         <p className='text-sm font-medium mt-4 text-white'>Input:</p>

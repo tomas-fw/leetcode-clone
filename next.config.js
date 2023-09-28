@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
+const nextConfig = {
+    webpack: (config) => {
+        config.externals = [...config.externals, 'jsdom'];
+        return config;
+    },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
