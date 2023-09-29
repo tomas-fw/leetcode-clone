@@ -1,8 +1,12 @@
-import { For } from '@/components/flow-control';
+'use client';
+
+import { For, If } from '@/components/flow-control';
 import { Problem } from '@/types/problem';
 import { javascript } from '@codemirror/lang-javascript';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import CodeMirror from '@uiw/react-codemirror';
+import clsx from 'clsx';
+import { useState } from 'react';
 import Split from 'react-split';
 import EditorFooter from '../EditorFooter';
 import PreferencesNav from '../PreferenceNav';
@@ -12,10 +16,8 @@ type Props = {
 };
 
 const Playground = ({ problem }: Props) => {
-    const boilerplate = `
-    function twoSum(nums, target) {
-        // Your code here
-    };`;
+    const [activeTestCaseId, setActiveTestCaseId] = useState(0);
+
     return (
         <div className='flex flex-col bg-dark-layer-1 relative overflow-x-hidden'>
             <PreferencesNav />
@@ -40,11 +42,20 @@ const Playground = ({ problem }: Props) => {
                     <div className='flex'>
                         <For of={problem.examples}>
                             {(example, index) => (
-                                <div className='mr-2 items-start mt-2 text-white' key={example.id}>
+                                <div
+                                    className='mr-2 items-start mt-2 text-white'
+                                    key={example.id}
+                                    onClick={() => setActiveTestCaseId(index)}
+                                >
                                     <div className='flex items-center flex-wrap gap-y-4'>
                                         <div
-                                            className='font-medium items-center transition-all focus:outline-none inline-flex bg-dark-fill-3
-                        hover:bg-dark-fill-2 relative rounded-lg px-4 py-1 cursor-pointer whitespace-nowrap'
+                                            className={clsx(
+                                                'font-medium items-center transition-all focus:outline-none inline-flex bg-dark-fill-3 hover:bg-dark-fill-2 relative rounded-lg px-4 py-1 cursor-pointer whitespace-nowrap',
+                                                {
+                                                    'text-gray-500': activeTestCaseId !== index,
+                                                    'text-white': activeTestCaseId === index,
+                                                }
+                                            )}
                                         >
                                             Case {index + 1}
                                         </div>
@@ -56,11 +67,15 @@ const Playground = ({ problem }: Props) => {
                     <div className='font-semibold my-4'>
                         <p className='text-sm font-medium mt-4 text-white'>Input:</p>
                         <div className='w-full cursor-text rounded-lg border px-3 py-[10px] bg-dark-fill-3 border-transparent text-white mt-2'>
-                            nums: [2,7,11,15], target: 9
+                            <If condition={!!problem.examples[activeTestCaseId].inputText}>
+                                <>{problem.examples[activeTestCaseId].inputText}</>
+                            </If>
                         </div>
                         <p className='text-sm font-medium mt-4 text-white'>Output:</p>
                         <div className='w-full cursor-text rounded-lg border px-3 py-[10px] bg-dark-fill-3 border-transparent text-white mt-2'>
-                            [0,1]
+                            <If condition={!!problem.examples[activeTestCaseId].outputText}>
+                                <>{problem.examples[activeTestCaseId].outputText}</>
+                            </If>
                         </div>
                     </div>
                 </div>

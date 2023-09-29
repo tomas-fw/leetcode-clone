@@ -1,6 +1,5 @@
 'use client';
 
-import { problems } from '@/mock-data/problems';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { AiFillYoutube } from 'react-icons/ai';
@@ -9,9 +8,13 @@ import { IoClose } from 'react-icons/io5';
 import YouTubePlayer from 'react-youtube';
 import { For, If } from '../flow-control';
 
-type Props = {};
+import { ProlemTable } from '@/types/problem';
 
-const ProblemsTable = (props: Props) => {
+type Props = {
+    problems: ProlemTable[];
+};
+
+const ProblemsTable = ({ problems }: Props) => {
     const [youtubeVideo, setYoutubeVideo] = useState({
         isOpen: false,
         videoId: '',

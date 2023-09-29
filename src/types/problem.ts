@@ -17,3 +17,12 @@ export type Problem = {
     handlerFunction: ((fn: any) => boolean) | string;
     starterFunctionName: string;
 };
+
+export type ProlemTable = {
+    id: string;
+    title: string;
+    difficulty: string;
+    category: string;
+    order: number;
+    videoId?: string;
+};
