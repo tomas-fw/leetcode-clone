@@ -19,7 +19,7 @@ const For = <T,>({ of, children }: Props<T>) => {
     // if (!isMounted) {
     //     return null; // or return a loader
     // }
-    return of.map(children);
+    return <> {of.map(children)}</>;
 };
 
 export default For;

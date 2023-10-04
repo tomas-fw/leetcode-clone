@@ -1,14 +1,14 @@
 'use client';
 
+import { ProlemTable } from '@/types/problem';
+import clsx from 'clsx';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { AiFillYoutube } from 'react-icons/ai';
 import { BsCheckCircle } from 'react-icons/bs';
 import { IoClose } from 'react-icons/io5';
 import YouTubePlayer from 'react-youtube';
-import { For, If } from '../flow-control';
-
-import { ProlemTable } from '@/types/problem';
+import { Choose, For, If, Otherwise, When } from '../flow-control';
 
 type Props = {
     problems: ProlemTable[];
@@ -41,26 +41,42 @@ const ProblemsTable = ({ problems }: Props) => {
             <tbody className='text-white'>
                 <For of={problems}>
                     {(problem, i) => {
-                        const difficultyColor =
-                            problem.difficulty === 'Easy'
-                                ? 'text-dark-green-s'
-                                : problem.difficulty === 'Medium'
-                                ? 'text-dark-yellow'
-                                : 'text-dark-pink';
                         return (
                             <tr className={`${i % 2 === 1 ? 'bg-dark-layer-1' : ''}`} key={problem.id}>
                                 <th className='px-2 py-4 font-medium whitespace-nowrap text-dark-green-s'>
                                     <BsCheckCircle fontSize='18' width='18' />
                                 </th>
                                 <td className='px-6 py-4'>
-                                    <Link
-                                        href={`/problems/${problem.id}`}
-                                        className='hover:text-blue-600 cursor-pointer'
-                                    >
-                                        {problem.title}
-                                    </Link>
+                                    <Choose>
+                                        <When condition={!!problem.link}>
+                                            <Link
+                                                href={problem.link!}
+                                                className='hover:text-blue-600 cursor-pointer'
+                                                target='_blank'
+                                                rel='noopener noreferrer'
+                                            >
+                                                {problem.title}
+                                            </Link>
+                                        </When>
+                                        <Otherwise>
+                                            <Link
+                                                href={`/problems/${problem.id}`}
+                                                className='hover:text-blue-600 cursor-pointer'
+                                            >
+                                                {problem.title}
+                                            </Link>
+                                        </Otherwise>
+                                    </Choose>
                                 </td>
-                                <td className={`px-6 py-4 ${difficultyColor}`}>{problem.difficulty}</td>
+                                <td
+                                    className={clsx('px-6 py-4', {
+                                        'text-dark-green-s': problem.difficulty === 'Easy',
+                                        'text-dark-yellow': problem.difficulty === 'Medium',
+                                        'text-dark-pink': problem.difficulty === 'Hard',
+                                    })}
+                                >
+                                    {problem.difficulty}
+                                </td>
                                 <td className='px-6 py-4'>{problem.category}</td>
                                 <td className='px-6 py-4'>
                                     {problem.videoId ? (

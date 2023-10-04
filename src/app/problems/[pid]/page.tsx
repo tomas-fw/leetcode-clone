@@ -1,6 +1,6 @@
 import Topbar from '@/components/Topbar';
 import { problems } from '@/data/problems';
-import { fetchStaticProblems } from '@/services/problems';
+import { fetchProblemFromDb, fetchStaticProblems } from '@/services/server-services/problems';
 import { NextPage } from 'next';
 import { notFound } from 'next/navigation';
 import Workspace from '../components/Workspace';
@@ -18,8 +18,9 @@ type Props = {
 
 const Problem: NextPage<Props> = async ({ params }) => {
     const problem = await fetchStaticProblems(params.pid);
+    const problemDataFromDb = await fetchProblemFromDb(params.pid);
 
-    if (!problem) {
+    if (!problem || !problemDataFromDb) {
         return notFound();
     }
 
@@ -27,7 +28,7 @@ const Problem: NextPage<Props> = async ({ params }) => {
     return (
         <div>
             <Topbar problemPage />
-            <Workspace problem={problem} />
+            <Workspace problem={problem} problemData={problemDataFromDb} />
         </div>
     );
 };

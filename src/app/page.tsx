@@ -1,6 +1,6 @@
 import ProblemsTable from '@/components/ProblemsTable';
 import Topbar from '@/components/Topbar';
-import { fetchProblemsFromDb } from '@/services/problems';
+import { fetchProblemsFromDb } from '@/services/server-services/problems';
 
 const LoadingSkeleton = () => {
     return (

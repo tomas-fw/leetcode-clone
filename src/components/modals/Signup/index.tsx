@@ -1,7 +1,8 @@
 'use client';
 
 import { useAuthModalRecoilUpdate } from '@/atoms/auth-modal-atom';
-import { auth } from '@/firebase/firebase';
+import { auth, fireStore } from '@/firebase/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ChangeEvent } from 'react';
 import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
@@ -13,9 +14,9 @@ const Signup = () => {
     const [createUserWithEmailAndPassword, user, loading, error] = useCreateUserWithEmailAndPassword(auth);
     const router = useRouter();
     const [inputs, setInputs] = useState({
-        email: '',
-        displayName: '',
-        password: '',
+        email: 'hicar50336@ipniel.com',
+        password: 'test123',
+        displayName: 'John Doe',
     });
 
     useEffect(() => {
@@ -41,12 +42,28 @@ const Signup = () => {
         }
 
         try {
+            toast.loading('Creating your account...', { position: 'top-center', toastId: 'loading' });
             const user = await createUserWithEmailAndPassword(inputs.email, inputs.password);
             if (!user) return;
-            console.log('🚀 ~ file: index.tsx:39 ~ handleSubmit ~ user:', user);
+            await setDoc(doc(fireStore, 'users', user.user.uid), {
+                uid: user.user.uid,
+                displayName: inputs.displayName,
+                email: user.user.email,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                likedProblems: [],
+                dislikedProblems: [],
+                solvedProblems: [],
+                starredProblems: [],
+            });
             router.push('/');
         } catch (error) {
+            let errorMsg = 'Something went wrong';
+            if (error instanceof Error) errorMsg = error.message;
+            toast.error(errorMsg, { position: 'top-center', autoClose: 3000 });
             console.log('error :>> ', error);
+        } finally {
+            toast.dismiss('loading');
         }
     };
     return (

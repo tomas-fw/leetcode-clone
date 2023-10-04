@@ -25,4 +25,7 @@ export type ProlemTable = {
     category: string;
     order: number;
     videoId?: string;
+    link?: string;
+    likes: number;
+    dislikes: number;
 };

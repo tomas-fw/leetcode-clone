@@ -41,7 +41,6 @@ const Login = () => {
             }
             const user = await signInWithEmailAndPassword(inputs.email, inputs.password);
             if (!user) return;
-            console.log('🚀 ~ file: index.tsx:39 ~ handleSubmit ~ user:', user);
             router.push('/');
         } catch (error) {
             console.log('error :>> ', error);
