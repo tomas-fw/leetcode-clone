@@ -30,7 +30,6 @@ const handlerTwoSum = (fn: any) => {
         }
         return true;
     } catch (error: any) {
-        console.log('twoSum handler function error');
         throw new Error(error);
     }
 };

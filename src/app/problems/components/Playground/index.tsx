@@ -1,22 +1,83 @@
 'use client';
 
 import { For, If } from '@/components/flow-control';
+import { problems } from '@/data/problems';
+import { auth, fireStore } from '@/firebase/firebase';
 import { Problem } from '@/types/problem';
 import { javascript } from '@codemirror/lang-javascript';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import CodeMirror from '@uiw/react-codemirror';
 import clsx from 'clsx';
-import { useState } from 'react';
+import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
 import Split from 'react-split';
+import { toast } from 'react-toastify';
 import EditorFooter from '../EditorFooter';
 import PreferencesNav from '../PreferenceNav';
 
 type Props = {
     problem: Problem;
+    onSuccess: () => void;
 };
 
-const Playground = ({ problem }: Props) => {
+const Playground = ({ problem, onSuccess }: Props) => {
     const [activeTestCaseId, setActiveTestCaseId] = useState(0);
+    const [userCode, setUserCode] = useState<string>(() => problem.starterCode);
+    const [user] = useAuthState(auth);
+
+    useEffect(() => {
+        const userCode = localStorage.getItem(`code-${problem.id}`);
+        if (user && userCode) {
+            setUserCode(userCode);
+        }
+    }, [problem.id, user]);
+
+    const handleSubmit = async () => {
+        if (!user) {
+            toast.error('You need to login to submit your code', {
+                position: 'top-center',
+                autoClose: 3000,
+                theme: 'dark',
+            });
+            return;
+        }
+
+        try {
+            const functionStartsAt = userCode.indexOf(problem.starterFunctionName);
+            const updatedUserCode = userCode.slice(functionStartsAt);
+            const cb = new Function(`return ${updatedUserCode}`)();
+            const handler = problems[problem.id].handlerFunction;
+            if (typeof handler !== 'function') throw new Error('Handler function not found');
+            const success = handler(cb);
+
+            if (!success) throw new Error('One or more test cases failed');
+            toast.success('Your code is correct', {
+                position: 'top-center',
+                autoClose: 3000,
+                theme: 'dark',
+            });
+
+            onSuccess();
+            const userRef = doc(fireStore, 'users', user.uid);
+            await updateDoc(userRef, {
+                solvedProblems: arrayUnion(problem.id),
+            });
+        } catch (error) {
+            if (error instanceof Error) {
+                toast.error('Oops! One or more test cases failed!', {
+                    position: 'top-center',
+                    autoClose: 3000,
+                    theme: 'dark',
+                });
+            }
+        }
+    };
+
+    const handleChange = (value: string) => {
+        setUserCode(value);
+        localStorage.setItem(`code-${problem.id}`, value);
+    };
 
     return (
         <div className='flex flex-col bg-dark-layer-1 relative overflow-x-hidden'>
@@ -24,10 +85,11 @@ const Playground = ({ problem }: Props) => {
             <Split className='h-[calc(100vh-94px)]' direction='vertical' sizes={[61, 40]} minSize={60}>
                 <div className='w-full overflow-auto'>
                     <CodeMirror
-                        value={problem.starterCode}
+                        value={userCode}
                         theme={vscodeDark}
                         extensions={[javascript()]}
                         style={{ fontSize: 16 }}
+                        onChange={handleChange}
                     />
                 </div>
                 <div className='w-full px-5 overflow-auto'>
@@ -80,7 +142,7 @@ const Playground = ({ problem }: Props) => {
                     </div>
                 </div>
             </Split>
-            <EditorFooter />
+            <EditorFooter handleSubmit={handleSubmit} />
         </div>
     );
 };
