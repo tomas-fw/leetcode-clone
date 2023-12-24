@@ -5,12 +5,12 @@ import { auth, fireStore } from '@/firebase/firebase';
 import { useFetchUserProblemInteraction } from '@/services/client-services/useFetchUserDataOnProblem';
 import { Problem, ProlemTable } from '@/types/problem';
 import clsx from 'clsx';
-import { Transaction, doc, runTransaction } from 'firebase/firestore';
+import { Transaction, arrayRemove, arrayUnion, doc, runTransaction, updateDoc } from 'firebase/firestore';
 import { sanitize } from 'isomorphic-dompurify';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { AiFillDislike, AiFillLike, AiOutlineLoading3Quarters } from 'react-icons/ai';
+import { AiFillDislike, AiFillLike, AiFillStar, AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BsCheck2Circle } from 'react-icons/bs';
 import { TiStarOutline } from 'react-icons/ti';
 import { toast } from 'react-toastify';
@@ -131,6 +131,30 @@ const ProblemDescription = ({ problem, ...rest }: Props) => {
         setUpdating(false);
     };
 
+    const handleFavorite = async () => {
+        if (!user) {
+            toast.error('You need to login to dislike a problem', { position: 'top-left', theme: 'dark' });
+            return;
+        }
+        if (updating) return;
+        setUpdating(true);
+
+        const userRef = doc(fireStore, 'users', user.uid);
+        if (!starred) {
+            await updateDoc(userRef, {
+                starredProblems: arrayUnion(problem.id),
+            });
+            setUserProblemInteraction((prev) => ({ ...prev, starred: true }));
+        } else {
+            await updateDoc(userRef, {
+                starredProblems: arrayRemove(problem.id),
+            });
+            setUserProblemInteraction((prev) => ({ ...prev, starred: false }));
+        }
+
+        setUpdating(false);
+    };
+
     return (
         <div className='bg-dark-layer-1'>
             {/* TAB */}
@@ -160,9 +184,11 @@ const ProblemDescription = ({ problem, ...rest }: Props) => {
                             >
                                 {problemStatistics.difficulty}
                             </div>
-                            <div className='rounded p-[3px] ml-4 text-lg transition-colors duration-200 text-green-s text-dark-green-s'>
-                                <BsCheck2Circle />
-                            </div>
+                            <If condition={solved}>
+                                <div className='rounded p-[3px] ml-4 text-lg transition-colors duration-200 text-green-s text-dark-green-s'>
+                                    <BsCheck2Circle />
+                                </div>
+                            </If>
                             <div
                                 className='flex items-center cursor-pointer hover:bg-dark-fill-3 space-x-1 rounded p-[3px]  ml-4 text-lg transition-colors duration-200 text-dark-gray-6'
                                 onClick={handleLike}
@@ -197,8 +223,21 @@ const ProblemDescription = ({ problem, ...rest }: Props) => {
                                 </Choose>
                                 <span className='text-xs'>{problemStatistics.dislikes}</span>
                             </div>
-                            <div className='cursor-pointer hover:bg-dark-fill-3  rounded p-[3px]  ml-4 text-xl transition-colors duration-200 text-green-s text-dark-gray-6 '>
-                                <TiStarOutline />
+                            <div
+                                className='cursor-pointer hover:bg-dark-fill-3  rounded p-[3px]  ml-4 text-xl transition-colors duration-200 text-green-s text-dark-gray-6 '
+                                onClick={handleFavorite}
+                            >
+                                <Choose>
+                                    <When condition={updating}>
+                                        <AiOutlineLoading3Quarters className='animate-spin' />
+                                    </When>
+                                    <When condition={starred}>
+                                        <AiFillStar className='text-dark-yellow ' />
+                                    </When>
+                                    <Otherwise>
+                                        <TiStarOutline />
+                                    </Otherwise>
+                                </Choose>
                             </div>
                         </div>
 

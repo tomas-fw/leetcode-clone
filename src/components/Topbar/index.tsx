@@ -1,9 +1,11 @@
 'use client';
 
 import { useAuthModalRecoilUpdate } from '@/atoms/auth-modal-atom';
+import { problems } from '@/data/problems';
 import { auth } from '@/firebase/firebase';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
 import { FC } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { BsList } from 'react-icons/bs';
@@ -12,17 +14,35 @@ import Logout from '../butons/Logout';
 import { Choose, If, Otherwise, When } from '../flow-control';
 import Timer from '../timer';
 import avatar from '/public/images/avatar.png';
-
 type Props = {
     problemPage?: boolean;
 };
 
 const Topbar: FC<Props> = ({ problemPage }) => {
     const [user] = useAuthState(auth);
+    const params = useParams();
+    const router = useRouter();
     const setAuthModalState = useAuthModalRecoilUpdate();
 
     const handleSignIn = () => {
         setAuthModalState((prev) => ({ ...prev, type: 'login', isOpen: true }));
+    };
+
+    const handleProblemChange = (page: number) => {
+        const problemKey = params.pid as keyof typeof problems;
+        const nextOrder = problems[problemKey].order + page;
+        const problemList = Object.values(problems);
+        const nextProblem = problemList.find((problem) => problem.order === nextOrder);
+
+        let targetProblemKey;
+        if (!nextProblem) {
+            const problemKeys = Object.keys(problems);
+            targetProblemKey = page > 0 ? problemKeys[0] : problemKeys[problemKeys.length - 1];
+        } else {
+            targetProblemKey = nextProblem.id;
+        }
+
+        router.push(`/problems/${targetProblemKey}`);
     };
 
     return (
@@ -36,6 +56,7 @@ const Topbar: FC<Props> = ({ problemPage }) => {
                         <div
                             className='flex items-center justify-center rounded bg-dark-fill-3 hover:bg-dark-fill-2
                         h-8 w-8 cursor-pointer'
+                            onClick={() => handleProblemChange(-1)}
                         >
                             <FaChevronLeft />
                         </div>
@@ -53,6 +74,7 @@ const Topbar: FC<Props> = ({ problemPage }) => {
                         <div
                             className='flex items-center justify-center rounded bg-dark-fill-3 hover:bg-dark-fill-2
                         h-8 w-8 cursor-pointer'
+                            onClick={() => handleProblemChange(1)}
                         >
                             <FaChevronRight />
                         </div>

@@ -25,6 +25,7 @@ const Problem: NextPage<Props> = async ({ params }) => {
     }
 
     problem.handlerFunction = problem.handlerFunction.toString();
+
     return (
         <div>
             <Topbar problemPage />
