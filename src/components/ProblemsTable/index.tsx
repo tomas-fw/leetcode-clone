@@ -1,5 +1,6 @@
 'use client';
 
+import useGetSolvedProblems from '@/services/client-services/useGetSolvedProblems';
 import { ProlemTable } from '@/types/problem';
 import clsx from 'clsx';
 import Link from 'next/link';
@@ -15,6 +16,7 @@ type Props = {
 };
 
 const ProblemsTable = ({ problems }: Props) => {
+    const solvedProblems = useGetSolvedProblems();
     const [youtubeVideo, setYoutubeVideo] = useState({
         isOpen: false,
         videoId: '',
@@ -44,7 +46,9 @@ const ProblemsTable = ({ problems }: Props) => {
                         return (
                             <tr className={`${i % 2 === 1 ? 'bg-dark-layer-1' : ''}`} key={problem.id}>
                                 <th className='px-2 py-4 font-medium whitespace-nowrap text-dark-green-s'>
-                                    <BsCheckCircle fontSize='18' width='18' />
+                                    <If condition={solvedProblems.includes(problem.id)}>
+                                        <BsCheckCircle fontSize='18' width='18' />
+                                    </If>
                                 </th>
                                 <td className='px-6 py-4'>
                                     <Choose>
