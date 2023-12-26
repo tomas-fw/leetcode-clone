@@ -3,6 +3,7 @@
 import { For, If } from '@/components/flow-control';
 import { problems } from '@/data/problems';
 import { auth, fireStore } from '@/firebase/firebase';
+import useLocalStorage from '@/hooks/useLocalStorage';
 import { Problem } from '@/types/problem';
 import { javascript } from '@codemirror/lang-javascript';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
@@ -21,9 +22,23 @@ type Props = {
     onSuccess: () => void;
 };
 
+export type TSettings = {
+    fontSize: '12px' | '13px' | '14px' | '15px' | '16px' | '17px' | '18px';
+    settingModalIsOpen: boolean;
+    dropDownIsOpen: boolean;
+};
+
+export type TFontSize = TSettings['fontSize'];
+
 const Playground = ({ problem, onSuccess }: Props) => {
     const [activeTestCaseId, setActiveTestCaseId] = useState(0);
     const [userCode, setUserCode] = useState<string>(() => problem.starterCode);
+    const [savedFontSize, setSavedFontSize] = useLocalStorage<TFontSize>('fontSize', '16px');
+    const [settings, setSettings] = useState<TSettings>({
+        fontSize: savedFontSize,
+        settingModalIsOpen: false,
+        dropDownIsOpen: false,
+    });
     const [user] = useAuthState(auth);
 
     useEffect(() => {
@@ -32,6 +47,10 @@ const Playground = ({ problem, onSuccess }: Props) => {
             setUserCode(userCode);
         }
     }, [problem.id, user]);
+
+    useEffect(() => {
+        setSavedFontSize(settings.fontSize);
+    }, [setSavedFontSize, settings.fontSize]);
 
     const handleSubmit = async () => {
         if (!user) {
@@ -79,16 +98,23 @@ const Playground = ({ problem, onSuccess }: Props) => {
         localStorage.setItem(`code-${problem.id}`, value);
     };
 
+    const handleSettings = (settingsArgs: Partial<TSettings>) => {
+        setSettings({
+            ...settings,
+            ...settingsArgs,
+        });
+    };
+
     return (
         <div className='flex flex-col bg-dark-layer-1 relative overflow-x-hidden'>
-            <PreferencesNav />
+            <PreferencesNav settings={settings} setSettings={handleSettings} />
             <Split className='h-[calc(100vh-94px)]' direction='vertical' sizes={[61, 40]} minSize={60}>
                 <div className='w-full overflow-auto'>
                     <CodeMirror
                         value={userCode}
                         theme={vscodeDark}
                         extensions={[javascript()]}
-                        style={{ fontSize: 16 }}
+                        style={{ fontSize: settings.fontSize }}
                         onChange={handleChange}
                     />
                 </div>
